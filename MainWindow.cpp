@@ -1,18 +1,18 @@
 
 #include "MainWindow.h"
+#include "CurrentStatus.h"
+#include "MpdClient.h"
 
-#include <QTabWidget>
-#include <QGridLayout>
+MpdClient *mpdclient;
 
-MainWindow::MainWindow()
+MainWindow::MainWindow() : QTabWidget()
 {
-	QTabWidget *tabs = new QTabWidget(this);
-	QGridLayout *layout = new QGridLayout(this);
-
 	resize(800, 480);
-	setLayout(layout);
-	layout->addWidget(tabs);
 
-	tabs->addTab(new QWidget(), "Test");
-	tabs->addTab(new QWidget(), "Test2");
+	mpdclient = new MpdClient(this);
+
+	addTab(new CurrentStatus(), "Current Status");
+	addTab(new QWidget(), "Test2");
+
+	mpdclient->start();
 }

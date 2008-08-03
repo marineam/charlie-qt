@@ -6,6 +6,25 @@
 #include <assert.h>
 #include <QTimer>
 
+static const mpd_Song _NULL_SONG = {
+	/*.file =	*/ "",
+	/*.artist =	*/ "",
+	/*.title = 	*/ "",
+	/*.album = 	*/ "",
+	/*.track = 	*/ "",
+	/*.name = 	*/ "",
+	/*.date = 	*/ "",
+	/*.genre = 	*/ "",
+	/*.composer = 	*/ "",
+	/*.performer =	*/ "",
+	/*.disc = 	*/ "",
+	/*.comment = 	*/ "",
+	/*.time =	*/ 0,
+	/*.pos = 	*/ 0,
+	/*.id = 	*/ 0,
+};
+static const mpd_Song *NULL_SONG = &_NULL_SONG;
+
 MpdClient::MpdClient(QObject *parent) : QObject(parent)
 {
 	conn = NULL;
@@ -29,6 +48,8 @@ bool MpdClient::start()
 		return false;
 	}
 
+	update();
+
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 	timer->start(1000);
@@ -38,19 +59,34 @@ bool MpdClient::start()
 
 void MpdClient::update()
 {
-	mpd_sendCommandListOkBegin(conn);
+	mpd_Status *old = status;
+
 	mpd_sendStatusCommand(conn);
-
-	if (status == NULL)
-		mpd_sendPlaylistInfoCommand(conn, -1);
-	else
-		mpd_sendPlChangesCommand(conn, status->playlist);
-
-	mpd_sendCommandListEnd(conn);
 
 	status = mpd_getStatus(conn);
 	assert(status);
-	mpd_nextListOkCommand(conn);
+	mpd_finishCommand(conn);
+
+	if (!(old && old->playlist == status->playlist)) {
+		if (old)
+			updatePlaylist(old->playlist);
+		else
+			updatePlaylist(-1);
+
+		if (currentSong())
+			emit(changedSong(currentSong()));
+	}
+	else if (old->song == status->song && currentSong())
+		emit(changedSong(currentSong()));
+
+}
+
+void MpdClient::updatePlaylist(long long version)
+{
+	if (version < 0)
+		mpd_sendPlChangesCommand(conn, version);
+	else
+		mpd_sendPlaylistInfoCommand(conn, -1);
 
 	mpd_InfoEntity *entity;
 	while ((entity = mpd_getNextInfoEntity(conn))) {
@@ -78,8 +114,11 @@ void MpdClient::update()
 	}
 }
 
-mpd_Song* MpdClient::currentSong()
+const mpd_Song* MpdClient::currentSong() const
 {
 	assert(status);
-	return playlist[status->song];
+	if (status->song >= playlist.size())
+		return NULL_SONG;
+	else
+		return playlist[status->song];
 }

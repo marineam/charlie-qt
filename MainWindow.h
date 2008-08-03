@@ -2,9 +2,9 @@
 #ifndef _MAIN_WINDOW_H_
 #define _MAIN_WINDOW_H_
 
-#include <QWidget>
+#include <QTabWidget>
 
-class MainWindow : public QWidget
+class MainWindow : public QTabWidget
 {
 public:
 	MainWindow();

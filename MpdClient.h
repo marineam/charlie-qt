@@ -16,12 +16,17 @@ public:
 	/* connect to mpd and start the update timer */
 	bool start();
 
-	mpd_Song* currentSong();
+	const mpd_Song* currentSong() const;
 
 public slots:
 	void update();
 
+signals:
+	void changedSong(const mpd_Song *new_song);
+
 private:
+	void updatePlaylist(long long version);
+
 	mpd_Connection *conn;
 	mpd_Status *status;
 
