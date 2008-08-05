@@ -74,10 +74,10 @@ void MpdClient::update()
 			updatePlaylist(-1);
 
 		if (currentSong())
-			emit(changedSong(currentSong()));
+			emit(playingSong(currentSong()));
 	}
 	else if (old->song == status->song && currentSong())
-		emit(changedSong(currentSong()));
+		emit(playingSong(currentSong()));
 
 }
 
@@ -103,6 +103,8 @@ void MpdClient::updatePlaylist(long long version)
 			mpd_freeSong(playlist[song->pos]);
 			playlist[song->pos] = song;
 		}
+
+		emit(changedSong(song));
 	}
 
 	mpd_finishCommand(conn);
@@ -111,7 +113,9 @@ void MpdClient::updatePlaylist(long long version)
 	for (int i = playlist.size() - 1; i >= status->playlistLength; i--) {
 		mpd_freeSong(playlist[i]);
 		playlist.removeAt(i);
+		emit(changedSong(NULL));
 	}
+
 }
 
 const mpd_Song* MpdClient::currentSong() const

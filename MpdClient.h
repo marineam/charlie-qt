@@ -22,6 +22,7 @@ public slots:
 	void update();
 
 signals:
+	void playingSong(const mpd_Song *new_song);
 	void changedSong(const mpd_Song *new_song);
 
 private:

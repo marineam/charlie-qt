@@ -9,7 +9,7 @@ CurrentStatus::CurrentStatus(QWidget *parent) : QWidget(parent)
 	song_title = new QLabel(this);
 	song_artist = new QLabel(this);
 
-	connect(mpdclient, SIGNAL(changedSong(const mpd_Song*)),
+	connect(mpdclient, SIGNAL(playingSong(const mpd_Song*)),
 			this, SLOT(updateSong(const mpd_Song*)));
 
 	setLayout(layout);

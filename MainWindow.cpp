@@ -1,6 +1,7 @@
 
 #include "MainWindow.h"
 #include "CurrentStatus.h"
+#include "CurrentPlaylist.h"
 #include "MpdClient.h"
 
 MpdClient *mpdclient;
@@ -12,7 +13,7 @@ MainWindow::MainWindow() : QTabWidget()
 	mpdclient = new MpdClient(this);
 
 	addTab(new CurrentStatus(), "Current Status");
-	addTab(new QWidget(), "Test2");
+	addTab(new CurrentPlaylist(), "Current Playlist");
 
 	mpdclient->start();
 }
